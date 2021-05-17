@@ -5,6 +5,7 @@ import { makeStyles } from '@material-ui/core'
 import { TextField, Button } from '@material-ui/core/';
 import { useState, MouseEvent } from 'react'
 import useDataLoadAPI from '../components/hooks/useDataLoadAPI'
+import axios, {AxiosResponse} from 'axios';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -34,12 +35,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-export default function Loading() {
+const url = 'https://hn.algolia.com/api/v1/search'
+
+export default function Loading(preloadData: any) {
   const classes = useStyles()
   const [text, setText] = useState('')
 
-  const url = 'https://hn.algolia.com/api/v1/search'
-  const [{responseData, searchText, isLoading, isError}, setSearchText] = useDataLoadAPI(url, '')
+  const [{responseData, searchText, isLoading, isError}, setSearchText] = useDataLoadAPI(preloadData.data, url, '')
 
   const onClick = (ev: MouseEvent) => {
     setSearchText(text)
@@ -87,4 +89,28 @@ export default function Loading() {
 
     </>
   )
+}
+
+// This gets called on every request
+export async function getServerSideProps() {
+  let data = null
+  let error = false
+
+  await axios.get(url, {params: {query: ''}})
+  .then ((response: AxiosResponse<Record<string, unknown>>) => {
+    data = response.data
+  })
+  .catch((error) => {
+    error = true
+  })
+
+  // Optional boolean value to allow the page to return a 404 status and page. 
+  if (!data || error) {
+    return {
+      notFound: true
+    }
+  }
+
+  // Pass data to the page via props
+  return { props: { data } }
 }

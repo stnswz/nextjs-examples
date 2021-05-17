@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios, {AxiosResponse} from 'axios';
 
-const useDataLoadAPI = (initialURL:string, initialSearchText:string): Array<any> => {
+const useDataLoadAPI = (preloadedData:any, initialURL:string, initialSearchText:string): Array<any> => {
   console.log('useDataLoadAPI')
 
   const [url, setURL] = useState(initialURL);
   const [searchText, setSearchText] = useState(initialSearchText);
-  const [responseData, setResponseData] = useState(null);
+  const [responseData, setResponseData] = useState(preloadedData);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -18,7 +18,7 @@ const useDataLoadAPI = (initialURL:string, initialSearchText:string): Array<any>
       setIsLoading(true)
 
       await axios.get(url, {params: {query: searchText}})
-      .then ((response: any) => {
+      .then ((response: AxiosResponse<Record<string, unknown>>) => {
         setResponseData(response.data)
       })
       .catch((error) => {
