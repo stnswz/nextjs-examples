@@ -2,8 +2,7 @@ import Head from 'next/head'
 import { Typography, Box, LinearProgress, Link } from '@material-ui/core/';
 import { List, ListItem, ListItemText } from '@material-ui/core/';
 import { makeStyles } from '@material-ui/core'
-import { TextField, Button } from '@material-ui/core/';
-import { useState, MouseEvent } from 'react'
+import InputBar from '../components/InputBar'
 import useDataLoadAPI from '../components/hooks/useDataLoadAPI'
 import axios, {AxiosResponse} from 'axios';
 
@@ -39,11 +38,11 @@ const url = 'https://hn.algolia.com/api/v1/search'
 
 export default function Loading(preloadData: any) {
   const classes = useStyles()
-  const [text, setText] = useState('')
+  //const [text, setText] = useState('')
 
-  const [{responseData, searchText, isLoading, isError}, setSearchText] = useDataLoadAPI(preloadData.data, url, '')
+  const [{responseData, isLoading, isError}, setSearchText] = useDataLoadAPI(preloadData.data, url, '')
 
-  const onClick = (ev: MouseEvent) => {
+  const startSearch = (text: string) => {
     setSearchText(text)
   }
 
@@ -64,14 +63,7 @@ export default function Loading(preloadData: any) {
         Loading Example
       </Typography>
 
-      <Box component='div' className={classes.inputBox}>
-        <TextField className={classes.textField} label="Add input text" variant="outlined" size='small' value={text} onChange={ev => setText(ev.target.value)} />
-        <Button className={classes.btn} onClick={onClick} variant="contained" color="primary" disableElevation>
-          suchen
-        </Button>
-      </Box>
-
-      <br />
+      <InputBar sendData={startSearch} />
 
       {isError && <div>Loading Error: Daten konnten nicht geladen werden.</div>}
 
