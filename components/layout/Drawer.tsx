@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Drawer from '@material-ui/core/Drawer'
 import { List, ListItem, ListItemText, ListItemIcon } from '@material-ui/core/'
-import { Menu as MenuIcon, HourglassEmpty, Home } from '@material-ui/icons/'
+import { Menu as MenuIcon, HourglassEmpty, Home, Web } from '@material-ui/icons/'
 import IconButton from '@material-ui/core/IconButton'
 import { makeStyles } from '@material-ui/core'
 import { useRouter } from 'next/router'
@@ -97,6 +97,16 @@ export default function Layout({children}: any) {
               <HourglassEmpty />
             </ListItemIcon>
             <ListItemText primary="Loading Example" />
+          </ListItem>
+          <ListItem button onClick={(ev) => handleClick(ev, "/apollo")}>
+            <ListItemIcon
+              classes={{
+                root: classes.listItemIconRoot,
+              }}
+            >
+              <Web />
+            </ListItemIcon>
+            <ListItemText primary="Apollo Example" />
           </ListItem>
         </List>
       </Drawer>

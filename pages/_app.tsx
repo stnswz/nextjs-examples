@@ -1,6 +1,8 @@
 import { AppProps } from 'next/app'
 import { useEffect } from 'react';
 import { ThemeProvider } from '@material-ui/core'
+import { ApolloProvider } from '@apollo/client/react'
+import apolloClient from '../components/apollo/client'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Layout from '../components/layout/Layout'
 import muiTheme from '../components/layout/theme';
@@ -20,7 +22,9 @@ function MyApp({ Component, pageProps }: AppProps) {
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <Layout>
-        <Component {...pageProps} />
+        <ApolloProvider client={apolloClient}>
+          <Component {...pageProps} />
+        </ApolloProvider>
       </Layout>
     </ThemeProvider>
   )

@@ -1,6 +1,6 @@
 import Head from 'next/head'
-import { Typography, Box, LinearProgress, Link } from '@material-ui/core/';
-import { List, ListItem, ListItemText } from '@material-ui/core/';
+import { Typography, Box, LinearProgress, Link } from '@material-ui/core/'
+import { List, ListItem, ListItemText } from '@material-ui/core/'
 import { makeStyles } from '@material-ui/core'
 import InputBar from '../components/InputBar'
 import useDataLoadAPI from '../components/hooks/useDataLoadAPI'
@@ -12,20 +12,6 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     height: 10
   },
-  inputBox: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: theme.spacing(2),
-    marginBottom: theme.spacing(2)
-
-  },
-  textField: {
-    width: '100%'
-  },
-  btn: {
-    marginLeft: 5,
-    whiteSpace: 'nowrap'
-  }, 
   resultList: {
     width: 500,
   },
