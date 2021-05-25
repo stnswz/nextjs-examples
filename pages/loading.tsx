@@ -22,11 +22,11 @@ const useStyles = makeStyles((theme) => ({
 
 const url = 'https://hn.algolia.com/api/v1/search'
 
-export default function Loading(preloadData: any) {
+export default function Loading(preloadedData: any) {
   const classes = useStyles()
   //const [text, setText] = useState('')
 
-  const [{responseData, isLoading, isError}, setSearchText] = useDataLoadAPI(preloadData.data, url, '')
+  const [{responseData, isLoading, isError}, setSearchText] = useDataLoadAPI(preloadedData.data, url, '')
 
   const startSearch = (text: string) => {
     setSearchText(text)

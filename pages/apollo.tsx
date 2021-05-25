@@ -1,43 +1,17 @@
 import Head from 'next/head'
 import { useState } from 'react'
 import { Typography, Box, LinearProgress } from '@material-ui/core/'
-import { InputLabel, MenuItem, FormControl, Select } from '@material-ui/core/'
 import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core/'
 import PublicIcon from '@material-ui/icons/Public';
 import { gql, useQuery, useLazyQuery } from '@apollo/client'
 import { makeStyles } from '@material-ui/core'
-import { ICountries, ICountry } from '../components/TypeDefinitions'
-
-const useStyles = makeStyles((theme) => ({
-  loaderBox: {
-    width: '100%',
-    height: 10
-  }, 
-  title: {
-    marginBottom: theme.spacing(2),
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 400,
-    textAlign: 'left'
-  },
-  contentBox: {
-    marginTop: theme.spacing(2),
-    width: '100%',
-    textAlign: 'left',
-    backgroundColor: '#eee',
-    paddingLeft: theme.spacing(1),
-  },
-  countryHeadline: {
-    marginLeft: -theme.spacing(1),
-  },
-  countryBody: {
-    marginTop: theme.spacing(1),
-  }
-}))
+import { IBasicCountry, ICountry } from '../components/TypeDefinitions'
+import CountrySelectBox from '../components/apollo/CountrySelectBox'
+import CountryViewBox from '../components/apollo/CountryViewBox'
+import client from '../components/apollo/client'
 
 interface ICountriesData {
-  countries: Array<ICountries>
+  countries: Array<IBasicCountry>
 }
 
 interface ICountryData {
@@ -48,11 +22,22 @@ interface ICountryVars {
   code: string
 }
 
+const useStyles = makeStyles((theme) => ({
+  loaderBox: {
+    width: '100%',
+    height: 10
+  }, 
+  title: {
+    marginBottom: theme.spacing(2),
+  }
+}))
+
 const GET_Countries = gql`
   query Countries {
     countries {
       name
       code
+      emoji
     }
   }
 `;
@@ -86,11 +71,12 @@ const GET_Country = gql`
   }
 `;
 
-export default function Apollo() {
+export default function Apollo( preloadedData: any) {
   const classes = useStyles()
 
-  const [countryCode, setCountryCode] = useState('')
-  const { loading, error, data: selectCountries } = useQuery<ICountriesData>(GET_Countries)
+  const selectCountries = preloadedData as ICountriesData
+
+  //const { loading, error, data: selectCountries } = useQuery<ICountriesData>(GET_Countries)
   const [startLoading, { loading: countryLoading, error: countryError, data: countryData }] = useLazyQuery<ICountryData, ICountryVars>(
     GET_Country, 
     {
@@ -98,14 +84,8 @@ export default function Apollo() {
     }
   );
 
-  const onChange = (event: any) => {
-    console.log("Selected: " + event.target.value)
-    setCountryCode(event.target.value);
-    startLoading({ variables: { code: event.target.value } })
-  }
-
-  function hasStates(states: Array<any>): boolean {
-    return states && states.length > 0
+  const countrySelected = (code: string): void => {
+    startLoading({ variables: { code: code } })
   }
 
   return (
@@ -117,71 +97,42 @@ export default function Apollo() {
       </Head>
 
       <Box component='div' className={classes.loaderBox}>
-        {(loading || countryLoading) && <LinearProgress />}
+        {/*(loading || countryLoading) && <LinearProgress />*/}
+        {countryLoading && <LinearProgress />}
       </Box>
       
       <Typography component="h3" variant="h3" className={classes.title}>
         Apollo Example
       </Typography>
 
-      {error && <div>Error! {error.message}</div>}
+      {/*error && <div>Error! {error.message}</div>*/}
       {countryError && <div>Error! {countryError.message}</div>}
 
-      <FormControl variant="outlined" className={classes.formControl}>
-        <InputLabel id="country-label">Country</InputLabel>
-        <Select
-          labelId="country-label"
-          id="country"
-          value={countryCode}
-          onChange={onChange}
-          label="Country"
-        >
-          
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          
-          {selectCountries && selectCountries.countries.map(item => (
-            <MenuItem key={item.code} value={item.code}>
-              {item.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <CountrySelectBox countries={selectCountries.countries} countrySelected={countrySelected} />
 
-      <Box component="div" className={classes.contentBox}>
-        {(countryData && countryData.country) &&
-          <>
-            <Typography component="h1" variant="h6" className={classes.countryHeadline}>
-              {countryData.country.name} {countryData.country.emoji} 
-            </Typography>
-            <Typography component="h2" variant="subtitle1">
-              Continent: {countryData.country.continent.name}
-            </Typography>
-            <Typography component="div" variant="subtitle2">
-              Capital: {countryData.country.capital}
-            </Typography>
-
-            <Typography component="div" variant="body1" className={classes.countryBody}>
-              Language: {countryData.country.languages[0].name} ({countryData.country.languages[0].native}) <br />
-              Currency: {countryData.country.currency} <br />
-              States: {!hasStates(countryData.country.states) ? 'None' : <br />} 
-              <List>
-                {countryData.country.states.map( item => 
-                  <ListItem>
-                    <ListItemIcon>
-                      <PublicIcon style={{minWidth: 40}}/>
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={item.name} 
-                    />
-                  </ListItem>
-                )}
-              </List>
-            </Typography>
-          </>
-        }
-      </Box>
+      {countryData && <CountryViewBox {...countryData.country} />}
     </>
   )
+}
+
+// This gets called on every request
+export async function getServerSideProps() {
+
+  const { error, data } = await client.query<ICountriesData>({
+    query: GET_Countries
+  });
+
+  // Optional boolean value to allow the page to return a 404 status and page. 
+  if (!data || error) {
+    return {
+      notFound: true
+    }
+  }
+
+  // Pass data to the page via props
+  return { 
+    props: { 
+      countries: data.countries 
+    }
+  }
 }
