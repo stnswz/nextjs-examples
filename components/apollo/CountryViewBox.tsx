@@ -56,7 +56,7 @@ export default function CountryViewBox(country: ICountry) {
         States: {!hasStates(country.states) ? 'None' : <br />} 
         <List>
           {country.states.map( item => 
-            <ListItem>
+            <ListItem key={item.code}>
               <ListItemIcon>
                 <PublicIcon style={{minWidth: 40}}/>
               </ListItemIcon>
